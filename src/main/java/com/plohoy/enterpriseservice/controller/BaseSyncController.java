@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import com.plohoy.enterpriseservice.entity.BaseJsonbEntity;
+import com.plohoy.enterpriseservice.entity.BaseJsonBinaryEntity;
 import com.plohoy.enterpriseservice.service.SyncService;
 import com.plohoy.enterpriseservice.service.TaskService;
 import com.plohoy.enterpriseadapter.dto.ResponseDto;
@@ -23,36 +23,36 @@ import java.util.concurrent.CompletableFuture;
  * @param <T> Entity type parameter
  */
 @Validated
-public interface BaseSyncController<T extends BaseJsonbEntity> {
+public interface BaseSyncController<T extends BaseJsonBinaryEntity> {
 
     /**
-     * Common GET method, which calls findByInn method from Store Service with client INN.
-     * If it returns null throws an Exception & synchronizes with SMEV
+     * Common GET method, which calls findByid method from Store Service with client id.
+     * If it returns null throws an Exception & synchronizes with Ext Service
      * @see SyncService
      * @see TaskService
-     * @param inn INN
+     * @param id id
      */
     @GetMapping
-    ResponseDto getFnsInfo(
-            @Pattern(regexp = "^[0-9]+$", message = "INN should contain digits only")
-            @Length(min = 3, max = 24, message = "INN can't contain less than {min} digits & more than {max} digits")
-            @NotBlank(message = "INN can't be empty")
-            @PathVariable String inn);
+    ResponseDto getInfo(
+            @Pattern(regexp = "^[0-9]+$", message = "id should contain digits only")
+            @Length(min = 3, max = 24, message = "id can't contain less than {min} digits & more than {max} digits")
+            @NotBlank(message = "id can't be empty")
+            @PathVariable String id);
 
     /**
-     * Common POST method, which calls syncSmev method from Sync Service
-     * with proper Smev Request Task by input INN
+     * Common POST method, which calls synchronize method from Sync Service
+     * with proper Request Task by input id
      * @see SyncService
      * @see TaskService
      *
-     * @param inn INN
+     * @param id id
      */
     @PostMapping
-    CompletableFuture<String> syncSmev (
-            @Pattern(regexp = "^[0-9]+$", message = "INN should contain digits only")
-            @Length(min = 3, max = 24, message = "INN can't contain less than {min} digits & more than {max} digits")
-            @NotBlank(message = "INN can't be empty")
-            @RequestParam String inn);
+    CompletableFuture<String> synchronize (
+            @Pattern(regexp = "^[0-9]+$", message = "id should contain digits only")
+            @Length(min = 3, max = 24, message = "id can't contain less than {min} digits & more than {max} digits")
+            @NotBlank(message = "id can't be empty")
+            @RequestParam String id);
 
-//    @PostMapping BaseJsonbEntity createRandomByInn(@RequestParam String inn);
+//    @PostMapping BaseJsonbEntity createRandomByid(@RequestParam String id);
 }

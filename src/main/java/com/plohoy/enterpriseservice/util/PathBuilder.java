@@ -10,18 +10,18 @@ import org.springframework.stereotype.Component;
 @Component
 public final class PathBuilder {
 
-    @Value("${fns.adapter.url}")
-    private String fnsAdapterUrl;
-    @Value("${smev.fns.path}")
-    private String smevFnsPath;
+    @Value("${adapter.url}")
+    private String adapterUrl;
+    @Value("${path}")
+    private String path;
 
     public String getRequestUrl(String specificPath) {
-        return fnsAdapterUrl + smevFnsPath + specificPath;
+        return adapterUrl + path + specificPath;
     }
 
     public String getFindInfoByIdUrl(String specificPathTemplate, String clientId) {
         return String.format(
-                fnsAdapterUrl + smevFnsPath +
+                adapterUrl + path +
                         specificPathTemplate, clientId);
     }
 }

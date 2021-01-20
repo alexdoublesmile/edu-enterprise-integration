@@ -7,18 +7,18 @@ import com.plohoy.enterpriseadapter.dto.ResponseDto;
 import java.io.Serializable;
 
 /**
- * Smev request task entity.
+ * Request task entity.
  */
 @Data
 @Builder
-public class SmevRequestTask implements Serializable {
+public class RequestTask implements Serializable {
     private String clientId;
-    private String inn;
+    private String id;
 
     private String requestPath;
     private String findIdPathTemplate;
 
-    private SmevRequestType requestType;
+    private RequestType requestType;
 
     private Object requestDto;
     private Class<? extends ResponseDto> responseDtoClass;

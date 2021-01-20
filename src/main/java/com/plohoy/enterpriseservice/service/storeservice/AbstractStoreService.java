@@ -3,9 +3,9 @@ package com.plohoy.enterpriseservice.service.storeservice;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import com.plohoy.enterpriseservice.entity.BaseJsonbEntity;
-import com.plohoy.enterpriseservice.repository.BaseFnsInfoRepository;
-import com.plohoy.enterpriseservice.request.SmevRequestTask;
+import com.plohoy.enterpriseservice.entity.BaseJsonBinaryEntity;
+import com.plohoy.enterpriseservice.repository.BaseInfoRepository;
+import com.plohoy.enterpriseservice.request.RequestTask;
 import com.plohoy.enterpriseservice.service.SyncService;
 import com.plohoy.enterpriseadapter.dto.ResponseDto;
 
@@ -19,14 +19,14 @@ import java.util.Optional;
  * All parameter types sets by current Store Service implementation
  *
  * @see BaseStoreService
- * @see BaseJsonbEntity
+ * @see BaseJsonBinaryEntity
  * @see com.plohoy.enterpriseservice.controller.AbstractSyncController
  * @param <T> proper Entity type parameter
  * @param <R> proper Repository type parameter
  */
 @Slf4j
 public abstract class AbstractStoreService
-        <T extends BaseJsonbEntity, R extends BaseFnsInfoRepository<T>>
+        <T extends BaseJsonBinaryEntity, R extends BaseInfoRepository<T>>
             implements BaseStoreService<T> {
     private final R repository;
     @Autowired private SyncService syncService;
@@ -37,31 +37,31 @@ public abstract class AbstractStoreService
     /**
      * Gets from current Store Service implementation proper Repository and sets it to class parameter.
      *
-     * @see BaseFnsInfoRepository
+     * @see BaseInfoRepository
      * @param repository proper Repository
      */
     @Autowired public AbstractStoreService(R repository) {
         this.repository = repository;
     }
 
-    @Override public String saveInfoFromSmev(ResponseDto responseDto, String inn) {
-        T entityFromDB = repository.findByInn(inn);
+    @Override public String saveInfoFromExtService(ResponseDto responseDto, String id) {
+        T entityFromDB = repository.findByid(id);
 
         if (Objects.isNull(entityFromDB)) {
             log.debug(
-                    "Запись {} для ИНН {} не найдена, создаем новую",
-                    entityFromDB.getClass().getSimpleName(), inn);
+                    "Запись {} для ID {} не найдена, создаем новую",
+                    entityFromDB.getClass().getSimpleName(), id);
 
             entityFromDB = getNewEntity();
 
-            entityFromDB.setInn(inn);
+            entityFromDB.setId(id);
             entityFromDB.setInfo(responseDto);
             entityFromDB.setCreateDate(Instant.now());
 
         } else {
             log.debug(
                     "Найдена запись {} для ИНН {}, обновляем",
-                    entityFromDB.getClass().getSimpleName(), inn);
+                    entityFromDB.getClass().getSimpleName(), id);
 
             entityFromDB.setInfo(responseDto);
             entityFromDB.setCreateDate(Instant.now());
@@ -71,15 +71,15 @@ public abstract class AbstractStoreService
                 .getId().toString();
     }
 
-    @Override public Optional<T> findByInn(SmevRequestTask task) {
-        T entityFromDB = repository.findByInn(task.getInn());
+    @Override public Optional<T> findByid(RequestTask task) {
+        T entityFromDB = repository.findByid(task.getId());
         if (Objects.nonNull(entityFromDB)
                 && isExpired(entityFromDB)) {
 
             entityFromDB.setCreateDate(Instant.now());
             repository.save(entityFromDB);
 
-            syncService.syncSmev(task);
+            syncService.synchronize(task);
         }
         return Optional.ofNullable(entityFromDB);
     }
@@ -94,9 +94,9 @@ public abstract class AbstractStoreService
 //
 //    @SneakyThrows
 //    @Override
-//    public T createRandomByInn(SmevRequestTask task) {
+//    public T createRandomByid(RequestTask task) {
 //        T entity = getNewEntity();
-//        entity.setInn(task.getInn());
+//        entity.setid(task.getid());
 //        entity.setCreateDate(Instant.now());
 //        ResponseDto info = task.getResponseDtoClass().newInstance();
 //        entity.setInfo(info);

@@ -2,7 +2,7 @@ package com.plohoy.enterpriseservice.entity;
 
 import lombok.Data;
 import org.hibernate.annotations.Type;
-import com.plohoy.enterpriseadapter.dto.FaktupnalResponseDto;
+import com.plohoy.enterpriseadapter.dto.SimpleResponseDto;
 import com.plohoy.enterpriseadapter.dto.ResponseDto;
 
 import javax.persistence.Column;
@@ -10,21 +10,21 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- * FaktupnalInfo Entity
+ * SimpleInfo Entity
  *
- * @see BaseJsonbEntity
+ * @see BaseJsonBinaryEntity
  */
 @Data
 @Entity
-@Table(name = "FAKTUPNAL")
-public class FaktupnalInfo extends BaseJsonbEntity {
+@Table
+public class SimpleInfo extends BaseJsonBinaryEntity {
 
     @Type(type = "jsonb")
-    @Column(columnDefinition = "jsonb", name = "FAKTUPNAL_INFO")
-    private FaktupnalResponseDto info;
+    @Column(columnDefinition = "jsonb", name = "SIMPLE_INFO")
+    private SimpleResponseDto info;
 
     @Override
     public void setInfo(ResponseDto responseDto) {
-        info = (FaktupnalResponseDto) responseDto;
+        info = (SimpleResponseDto) responseDto;
     }
 }

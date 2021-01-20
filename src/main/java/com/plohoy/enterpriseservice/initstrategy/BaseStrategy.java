@@ -1,6 +1,6 @@
 package com.plohoy.enterpriseservice.initstrategy;
 
-import com.plohoy.enterpriseservice.request.SmevRequestType;
+import com.plohoy.enterpriseservice.request.RequestType;
 import com.plohoy.enterpriseadapter.dto.ResponseDto;
 
 import java.io.Serializable;
@@ -14,10 +14,10 @@ import java.io.Serializable;
  */
 public interface BaseStrategy extends Serializable {
     /**
-     * Gets proper RequestDto(sets INN to it from current Smev request type)
-     * @param inn INN
+     * Gets proper RequestDto(sets ID to it from current Request type)
+     * @param id ID
      */
-    Object getRequestDto(String inn);
+    Object getRequestDto(String id);
 
     /**
      * Gets proper ResponseDtoClass
@@ -28,15 +28,15 @@ public interface BaseStrategy extends Serializable {
     /**
      * Gets proper type if Request
      */
-    SmevRequestType getRequestType();
+    RequestType getRequestType();
 
     /**
-     * Gets from url.property file proper request specific path(fns/smev/[requestpath]).
+     * Gets from url.property file proper request specific path(/[requestpath]).
      */
     String getRequestPath();
 
     /**
-     * Gets from url.property file proper response specific path(fns/smev/[findInfoByClientId]/[id] - path template for searching client by id).
+     * Gets from url.property file proper response specific path(/[findInfoByClientId]/[id] - path template for searching client by id).
      */
     String getFindIdPathTemplate();
 

@@ -24,13 +24,13 @@ import java.util.UUID;
 })
 @Data
 @MappedSuperclass
-public abstract class BaseJsonbEntity implements Serializable {
+public abstract class BaseJsonBinaryEntity implements Serializable {
     @Id
     @GeneratedValue
     private UUID id;
 
-    @Column(name = "INN", nullable = false)
-    private String inn;
+    @Column(name = "id", nullable = false)
+    private String id;
 
     @Column(name = "create_date")
     private Instant createDate;

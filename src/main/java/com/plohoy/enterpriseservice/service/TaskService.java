@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import com.plohoy.enterpriseservice.binding.DelaySource;
 import com.plohoy.enterpriseservice.initstrategy.BaseStrategy;
-import com.plohoy.enterpriseservice.request.SmevRequestTask;
+import com.plohoy.enterpriseservice.request.RequestTask;
 import com.plohoy.enterpriseservice.service.storeservice.AbstractStoreService;
 import com.plohoy.enterpriseservice.util.PathBuilder;
 import com.plohoy.enterpriseservice.util.RestHelper;
@@ -23,7 +23,7 @@ import com.plohoy.enterpriseservice.util.StoreServiceFactory;
 import com.plohoy.enterpriseadapter.dto.ResponseDto;
 
 /**
- * Service for executing SMEV request Task from queue
+ * Service for executing Request Task from queue
  */
 @Slf4j
 @Service
@@ -48,10 +48,10 @@ public class TaskService {
     }
 
     /**
-     * - Gets SMEV request task from queue and increase attempts of it's returns<br>
-     * - Then try to execute SMEV request task<br>
-     * - If success, response from SMEV sending to current Store Service<br>
-     * - If not success, SMEV request task is sending back to the queue(if there are attempts of returns)
+     * - Gets Request task from queue and increase attempts of it's returns<br>
+     * - Then try to execute Request task<br>
+     * - If success, response from Ext Service sending to current Store Service<br>
+     * - If not success, Request task is sending back to the queue(if there are attempts of returns)
      *
      * @see AbstractStoreService
      * @see BaseStrategy
@@ -59,11 +59,11 @@ public class TaskService {
      * @throws JsonProcessingException the json processing exception
      */
     @StreamListener(target = Sink.INPUT)
-    public void handleSmevRequestTask(Message<Object> message)
+    public void handleRequestTask(Message<Object> message)
             throws JsonProcessingException {
         log.info("Processing task: {}", message.getPayload().toString());
 
-        SmevRequestTask task = getSmevRequestTaskFromMessage(message);
+        RequestTask task = getRequestTaskFromMessage(message);
         task.increaseAttempts();
         log.info("Attempt for {}: {}",
                 task.getRequestType(),
@@ -76,16 +76,16 @@ public class TaskService {
                                             task.getFindIdPathTemplate(),
                                             task.getClientId()),
                             task.getResponseDtoClass());
-            log.info("Получен ответ из СМЭВ: " + response.getBody());
+            log.info("Получен ответ: " + response.getBody());
 
             storeServiceFactory
                     .getStoreService(task.getRequestType())
-                    .saveInfoFromSmev(
+                    .saveInfoFromExtService(
                             response.getBody(),
-                            task.getInn());
+                            task.getId());
 
         } catch (HttpClientErrorException.NotFound e) {
-            log.info("Ответ из СМЭВ не найден: {}", e.getMessage());
+            log.info("Ответ не найден: {}", e.getMessage());
 
             if (task.getAttempts() >= attemptLimit) {
                 log.info("Превышено допустимое количество попыток");
@@ -99,11 +99,11 @@ public class TaskService {
         }
     }
 
-    private SmevRequestTask getSmevRequestTaskFromMessage(Message<Object> message)
+    private RequestTask getRequestTaskFromMessage(Message<Object> message)
             throws JsonProcessingException {
         return new ObjectMapper()
                 .readValue(
                         message.getPayload().toString(),
-                        SmevRequestTask.class);
+                        RequestTask.class);
     }
 }

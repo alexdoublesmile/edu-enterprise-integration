@@ -15,12 +15,11 @@ import org.springframework.web.method.HandlerMethod;
 import com.plohoy.enterpriseservice.annotation.MvcIntegrationTest;
 import com.plohoy.enterpriseservice.controller.AbstractSyncController;
 import com.plohoy.enterpriseservice.controller.BaseSyncController;
-import com.plohoy.enterpriseservice.entity.BaseJsonbEntity;
+import com.plohoy.enterpriseservice.entity.BaseJsonBinaryEntity;
 import com.plohoy.enterpriseservice.initstrategy.BaseStrategy;
-import com.plohoy.enterpriseservice.request.SmevRequestType;
-import com.plohoy.enterpriseservice.service.storeservice.AbstractStoreService;
+import com.plohoy.enterpriseservice.request.RequestType;
 import com.plohoy.enterpriseservice.service.storeservice.BaseStoreService;
-import com.plohoy.enterpriseservice.util.InnHelper;
+import com.plohoy.enterpriseservice.util.idHelper;
 import com.plohoy.enterpriseservice.util.TestCaseBuilder;
 import com.plohoy.enterpriseservice.util.StoreServiceFactory;
 import com.plohoy.enterpriseadapter.dto.ResponseDto;
@@ -40,9 +39,9 @@ public class SyncControllerTest {
     @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
     @Autowired private MockMvc mvc;
     @Autowired private StoreServiceFactory serviceFactory;
-    @Autowired private InnHelper innHelper;
+    @Autowired private idHelper idHelper;
 
-    private Class<? extends BaseJsonbEntity> expectedInfoType;
+    private Class<? extends BaseJsonBinaryEntity> expectedInfoType;
     private Class<? extends BaseStrategy> expectedStrategyType;
     private Class<? extends BaseSyncController> expectedControllerType;
     private Class<? extends BaseStoreService> expectedStoreServiceType;
@@ -51,10 +50,10 @@ public class SyncControllerTest {
     private String infoTypeName;
     private String expectedRequestUrl;
     private String expectedFindClientByIdUrl;
-    private SmevRequestType expectedSmevRequestType;
+    private RequestType expectedRequestType;
 
     public SyncControllerTest(
-            Class<? extends BaseJsonbEntity> expectedInfoType,
+            Class<? extends BaseJsonBinaryEntity> expectedInfoType,
             Class<? extends BaseStrategy> expectedStrategyType,
             Class<? extends BaseSyncController> expectedControllerType,
             Class<? extends BaseStoreService> expectedStoreServiceType,
@@ -63,7 +62,7 @@ public class SyncControllerTest {
             String infoTypeName,
             String expectedRequestUrl,
             String expectedFindClientByIdUrl,
-            SmevRequestType expectedSmevRequestType
+            RequestType expectedRequestType
             ) {
         this.expectedInfoType = expectedInfoType;
         this.expectedStrategyType = expectedStrategyType;
@@ -74,7 +73,7 @@ public class SyncControllerTest {
         this.infoTypeName = infoTypeName;
         this.expectedRequestUrl = expectedRequestUrl;
         this.expectedFindClientByIdUrl = expectedFindClientByIdUrl;
-        this.expectedSmevRequestType = expectedSmevRequestType;
+        this.expectedRequestType = expectedRequestType;
     }
 
     @Parameterized.Parameters(name = "sync {9} test")
@@ -86,11 +85,11 @@ public class SyncControllerTest {
     public void shouldSyncExpectedInfo() throws Exception {
         mvc.perform(
                     post(String.format("/%s/sync", infoTypeName))
-                    .param("inn", innHelper.getRandomInn()))
+                    .param("id", idHelper.getRandomid()))
 
                 .andDo(print())
                 .andExpect(handler().handlerType(expectedControllerType))
-                .andExpect(handler().methodName("syncSmev"))
+                .andExpect(handler().methodName("synchronize"))
                 .andExpect(status().isOk())
                 .andExpect(request().asyncStarted())
                 .andExpect(request().asyncResult(Matchers.any(String.class)))
@@ -101,7 +100,7 @@ public class SyncControllerTest {
     public void shouldSetExpectedStrategy() throws Exception {
         MvcResult mvcResult = mvc.perform(
                 post(String.format("/%s/sync", infoTypeName))
-                        .content(innHelper.getRandomInn()))
+                        .content(idHelper.getRandomid()))
                 .andDo(print())
                 .andReturn();
 
@@ -113,8 +112,8 @@ public class SyncControllerTest {
         assertEquals(expectedStrategyType, actualStrategy.getClass());
         assertEquals(expectedRequestUrl, actualStrategy.getRequestPath());
         assertEquals(expectedFindClientByIdUrl, actualStrategy.getFindIdPathTemplate());
-        assertEquals(expectedSmevRequestType, actualStrategy.getRequestType());
-        assertEquals(expectedRequestDtoType, actualStrategy.getRequestDto(innHelper.getRandomInn()).getClass());
+        assertEquals(expectedRequestType, actualStrategy.getRequestType());
+        assertEquals(expectedRequestDtoType, actualStrategy.getRequestDto(idHelper.getRandomid()).getClass());
         assertEquals(expectedResponseDtoType, actualStrategy.getResponseDtoClass());
     }
 
@@ -122,7 +121,7 @@ public class SyncControllerTest {
     public void shouldSetExpectedStoreService() throws Exception {
         MvcResult mvcResult = mvc.perform(
                 post(String.format("/%s/sync", infoTypeName))
-                        .content(innHelper.getRandomInn()))
+                        .content(idHelper.getRandomid()))
                 .andDo(print())
                 .andReturn();
 
@@ -137,10 +136,10 @@ public class SyncControllerTest {
     }
 
     @Test
-    public void failedByLargeInn() throws Exception {
+    public void failedByLargeid() throws Exception {
         mvc.perform(
                 post(String.format("/%s/sync", infoTypeName))
-                        .content(innHelper.getLargeInn()))
+                        .content(idHelper.getLargeid()))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(request().asyncNotStarted())
@@ -148,10 +147,10 @@ public class SyncControllerTest {
     }
 
     @Test
-    public void failedBySmallInn() throws Exception {
+    public void failedBySmallid() throws Exception {
         mvc.perform(
                 post(String.format("/%s/sync", infoTypeName))
-                        .content(innHelper.getSmallInn()))
+                        .content(idHelper.getSmallid()))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(request().asyncNotStarted())
@@ -159,10 +158,10 @@ public class SyncControllerTest {
     }
 
     @Test
-    public void failedByNormalInvalidInn() throws Exception {
+    public void failedByNormalInvalidid() throws Exception {
         mvc.perform(
                 post(String.format("/%s/sync", infoTypeName))
-                        .content(innHelper.getSmallInn() + "-"))
+                        .content(idHelper.getSmallid() + "-"))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(request().asyncNotStarted())
@@ -170,10 +169,10 @@ public class SyncControllerTest {
     }
 
     @Test
-    public void failedByLargeInvalidInn() throws Exception {
+    public void failedByLargeInvalidid() throws Exception {
         mvc.perform(
                 post(String.format("/%s/sync", infoTypeName))
-                        .content(innHelper.getLargeInn() + "-"))
+                        .content(idHelper.getLargeid() + "-"))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(request().asyncNotStarted())
@@ -181,10 +180,10 @@ public class SyncControllerTest {
     }
 
     @Test
-    public void failedByNormalSpaceInn() throws Exception {
+    public void failedByNormalSpaceid() throws Exception {
         mvc.perform(
                 post(String.format("/%s/sync", infoTypeName))
-                        .content(innHelper.getSmallInn() + " "))
+                        .content(idHelper.getSmallid() + " "))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(request().asyncNotStarted())
@@ -192,10 +191,10 @@ public class SyncControllerTest {
     }
 
     @Test
-    public void failedByLargeSpaceInn() throws Exception {
+    public void failedByLargeSpaceid() throws Exception {
         mvc.perform(
                 post(String.format("/%s/sync", infoTypeName))
-                        .content(innHelper.getLargeInn() + " "))
+                        .content(idHelper.getLargeid() + " "))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(request().asyncNotStarted())
@@ -203,10 +202,10 @@ public class SyncControllerTest {
     }
 
     @Test
-    public void failedByNormalLetterInn() throws Exception {
+    public void failedByNormalLetterid() throws Exception {
         mvc.perform(
                 post(String.format("/%s/sync", infoTypeName))
-                        .content(innHelper.getSmallInn() + "q"))
+                        .content(idHelper.getSmallid() + "q"))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(request().asyncNotStarted())
@@ -214,10 +213,10 @@ public class SyncControllerTest {
     }
 
     @Test
-    public void failedByLargeLetterInn() throws Exception {
+    public void failedByLargeLetterid() throws Exception {
         mvc.perform(
                 post(String.format("/%s/sync", infoTypeName))
-                        .content(innHelper.getLargeInn() + "q"))
+                        .content(idHelper.getLargeid() + "q"))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(request().asyncNotStarted())
@@ -225,7 +224,7 @@ public class SyncControllerTest {
     }
 
     @Test
-    public void failedByBlankInn() throws Exception {
+    public void failedByBlankid() throws Exception {
         mvc.perform(
                 post(String.format("/%s/sync", infoTypeName))
                         .content(" "))
@@ -236,7 +235,7 @@ public class SyncControllerTest {
     }
 
     @Test
-    public void failedByEmptyInn() throws Exception {
+    public void failedByEmptyid() throws Exception {
         mvc.perform(
                 post(String.format("/%s/sync", infoTypeName))
                         .content(""))

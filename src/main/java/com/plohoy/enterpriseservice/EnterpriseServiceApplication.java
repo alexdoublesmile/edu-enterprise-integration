@@ -21,7 +21,7 @@ import org.springframework.web.client.RestTemplate;
 public class EnterpriseServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(FnsServiceApplication.class, args);
+        SpringApplication.run(EnterpriseServiceApplication.class, args);
     }
 
     @Bean
@@ -30,10 +30,10 @@ public class EnterpriseServiceApplication {
     }
 
     @Bean
-    public OpenAPI fnsAdapterOpenAPI() {
+    public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .components(new Components())
                 .info(new Info()
-                        .title("ФНС Служба"));
+                        .title("Служба"));
     }
 }

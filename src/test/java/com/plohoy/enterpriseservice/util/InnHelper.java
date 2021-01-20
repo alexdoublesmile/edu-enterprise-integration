@@ -8,54 +8,54 @@ import java.util.Random;
 
 @Getter
 @Component
-public class InnHelper {
-    @Value("${inn.min.length}") private String minInnSizeProperty;
-    @Value("${inn.max.length}") private String maxInnSizeProperty;
+public class idHelper {
+    @Value("${id.min.length}") private String minidSizeProperty;
+    @Value("${id.max.length}") private String maxidSizeProperty;
 
-    @Value("${inn.size.error.message}") private String innSizeErrorMessage;
-    @Value("${inn.format.error.message}") private String innFormatErrorMessage;
-    @Value("${inn.blank.error.message}") private String innBlankErrorMessage;
-    @Value("${inn.not.found.error.message}") private String innNotFoundMessage;
+    @Value("${id.size.error.message}") private String idSizeErrorMessage;
+    @Value("${id.format.error.message}") private String idFormatErrorMessage;
+    @Value("${id.blank.error.message}") private String idBlankErrorMessage;
+    @Value("${id.not.found.error.message}") private String idNotFoundMessage;
 
-    public String getSmallInn() {
-        return getSizedInn(Integer.parseInt(minInnSizeProperty) - 1);
+    public String getSmallid() {
+        return getSizedid(Integer.parseInt(minidSizeProperty) - 1);
     }
 
-    public String getLargeInn() {
-        return getSizedInn(Integer.parseInt(maxInnSizeProperty) + 1);
+    public String getLargeid() {
+        return getSizedid(Integer.parseInt(maxidSizeProperty) + 1);
     }
 
-    public String getRandomInn() {
-        return getRandomSizedInn(
-                Integer.parseInt(minInnSizeProperty),
-                Integer.parseInt(maxInnSizeProperty));
+    public String getRandomid() {
+        return getRandomSizedid(
+                Integer.parseInt(minidSizeProperty),
+                Integer.parseInt(maxidSizeProperty));
     }
 
-    private String getSizedInn(int innSize) {
-        String inn = "0";
-        if (innSize > 0) {
-            String innTemplate = "%0" + innSize + "d";
-            int randomTemplate = (int) (Math.pow(10, innSize) - 1);
+    private String getSizedid(int idSize) {
+        String id = "0";
+        if (idSize > 0) {
+            String idTemplate = "%0" + idSize + "d";
+            int randomTemplate = (int) (Math.pow(10, idSize) - 1);
 
-            inn = String.format(
-                    innTemplate,
+            id = String.format(
+                    idTemplate,
                     new Random().nextInt(randomTemplate));
         }
-        return inn;
+        return id;
     }
 
-    private String getRandomSizedInn(int minSize, int maxSize) {
-        String inn = "0";
+    private String getRandomSizedid(int minSize, int maxSize) {
+        String id = "0";
         if (minSize >= 0 && maxSize > minSize) {
             int randomSize = (int) ((Math.random() * (maxSize - minSize + 1)) + minSize);
 
-            String innTemplate = "%0" + randomSize + "d";
+            String idTemplate = "%0" + randomSize + "d";
             int randomTemplate = (int) (Math.pow(10, randomSize) - 1);
 
-            inn = String.format(
-                    innTemplate,
+            id = String.format(
+                    idTemplate,
                     new Random().nextInt(randomTemplate));
         }
-        return inn;
+        return id;
     }
 }

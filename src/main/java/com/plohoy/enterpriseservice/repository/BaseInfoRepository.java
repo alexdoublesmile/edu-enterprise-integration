@@ -2,7 +2,7 @@ package com.plohoy.enterpriseservice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
-import com.plohoy.enterpriseservice.entity.BaseJsonbEntity;
+import com.plohoy.enterpriseservice.entity.BaseJsonBinaryEntity;
 import com.plohoy.enterpriseservice.service.storeservice.AbstractStoreService;
 
 /**
@@ -13,13 +13,13 @@ import com.plohoy.enterpriseservice.service.storeservice.AbstractStoreService;
  * @see AbstractStoreService
  */
 @NoRepositoryBean
-public interface BaseFnsInfoRepository<T extends BaseJsonbEntity> extends JpaRepository<T, String> {
+public interface BaseInfoRepository<T extends BaseJsonBinaryEntity> extends JpaRepository<T, String> {
     /**
-     * Finds proper info from DB by INN according to current entity type.
+     * Finds proper info from DB by id according to current entity type.
      *
-     * @param inn INN
+     * @param id id
      * @return proper Entity type
-     * @see BaseJsonbEntity
+     * @see BaseJsonBinaryEntity
      */
-    T findByInn(String inn);
+    T findByid(String id);
 }

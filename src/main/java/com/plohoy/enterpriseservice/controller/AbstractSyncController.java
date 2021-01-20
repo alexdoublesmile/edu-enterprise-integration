@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import com.plohoy.enterpriseservice.entity.BaseJsonbEntity;
+import com.plohoy.enterpriseservice.entity.BaseJsonBinaryEntity;
 import com.plohoy.enterpriseservice.initstrategy.BaseStrategy;
-import com.plohoy.enterpriseservice.request.SmevRequestTask;
+import com.plohoy.enterpriseservice.request.RequestTask;
 import com.plohoy.enterpriseservice.service.SyncService;
 import com.plohoy.enterpriseservice.util.StoreServiceFactory;
 import com.plohoy.enterpriseadapter.dto.ResponseDto;
@@ -31,7 +31,7 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 @RestController
 public abstract class AbstractSyncController<
-        T extends BaseJsonbEntity,
+        T extends BaseJsonBinaryEntity,
         S extends BaseStrategy>
             implements BaseSyncController<T> {
     @Autowired private SyncService syncService;
@@ -48,55 +48,55 @@ public abstract class AbstractSyncController<
         this.strategy = strategy;
     }
 
-    @Operation(summary = "Получение сведений ФНС по ИНН")
+    @Operation(summary = "Получение сведений")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ответ найден"),
-            @ApiResponse(responseCode = "404", description = "Не найдено ЮЛ/ИП по указанному ИНН"),
+            @ApiResponse(responseCode = "404", description = "Не найдено сведений"),
             @ApiResponse(responseCode = "500", description = "Ошибка сервера")
     })
-    @GetMapping("/{inn}")
-    @Override public ResponseDto getFnsInfo(
-            @Parameter(description = "ИНН", required = true, example = "01234567")
-            @PathVariable String inn) {
+    @GetMapping("/{id}")
+    @Override public ResponseDto getInfo(
+            @Parameter(required = true, example = "01234567")
+            @PathVariable String id) {
         return storeServiceFactory.getStoreService(strategy.getRequestType())
-                .findByInn(getTaskByInn(inn))
+                .findByid(getTaskByid(id))
                 .orElseGet(() -> {
-                    syncService.syncSmev(getTaskByInn(inn));
+                    syncService.synchronize(getTaskByid(id));
                     throw new ResponseStatusException(
-                            HttpStatus.NOT_FOUND, "INN wasn't found");
+                            HttpStatus.NOT_FOUND);
                 })
                 .getInfo();
     }
 
-    @Operation(summary = "Отправка запроса на синхронизацию сведений по введенному ИНН")
+    @Operation(summary = "Отправка запроса на синхронизацию сведений")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ответ найден"),
             @ApiResponse(responseCode = "500", description = "Ошибка сервера")
     })
     @PostMapping("/sync")
-    @Override public CompletableFuture<String> syncSmev(
-            @Parameter(description = "ИНН", required = true, example = "01234567")
-            @RequestParam String inn) {
+    @Override public CompletableFuture<String> synchronize(
+            @Parameter(required = true, example = "01234567")
+            @RequestParam String id) {
 
-        return syncService.syncSmev(getTaskByInn(inn));
+        return syncService.synchronize(getTaskByid(id));
     }
 
-    private SmevRequestTask getTaskByInn(String inn) {
-        return SmevRequestTask.builder()
-            .inn(inn)
+    private RequestTask getTaskByid(String id) {
+        return RequestTask.builder()
+            .id(id)
             .requestPath(strategy.getRequestPath())
             .findIdPathTemplate(strategy.getFindIdPathTemplate())
             .requestType(strategy.getRequestType())
-            .requestDto(strategy.getRequestDto(inn))
+            .requestDto(strategy.getRequestDto(id))
             .responseDtoClass(strategy.getResponseDtoClass())
             .attempts(0)
             .build();
     }
 //
 //    @PostMapping("/test/create")
-//    @Override public BaseJsonbEntity createRandomByInn(@RequestParam String inn) {
+//    @Override public BaseJsonbEntity createRandomByid(@RequestParam String id) {
 //        return storeServiceFactory
 //                .getStoreService(strategy.getRequestType())
-//                .createRandomByInn(getTaskByInn(inn));
+//                .createRandomByid(getTaskByid(id));
 //    }
 }

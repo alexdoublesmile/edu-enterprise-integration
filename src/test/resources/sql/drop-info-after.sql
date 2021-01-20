@@ -1,12 +1,1 @@
-delete from bank_acc_entrep;
-delete from bank_acc_org;
-delete from bank_acc_pers;
-delete from diskvlic;
-delete from faktupnal;
-delete from ndfl3;
-delete from ndipsr;
-delete from vipip;
-delete from vipul;
-delete from zadorg;
-delete from zpvipegr;
-delete from zvipul;
+delete from simple;
